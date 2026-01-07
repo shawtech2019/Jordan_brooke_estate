@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import Header from '../components/navigation/Navbar';
+import Home from '../pages/home/Home';
 
 
 
@@ -9,7 +11,10 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 const AppRoutes: React.FC = () => {
   return (
     <Router>
-    {/* <Route path="/" element={<Home />} /> */}
+      <Header />
+      <Routes>
+         <Route path="/" element={<Home />} />
+      </Routes>
     </Router>
   );
 };
