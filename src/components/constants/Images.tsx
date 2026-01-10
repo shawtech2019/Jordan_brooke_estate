@@ -39,8 +39,8 @@ interface Assets {
 }
 
 const assets: Assets = {
-    LogoImg
-    HeroSectionImg
+    LogoImg,
+    HeroSectionImg,
 
 }
 

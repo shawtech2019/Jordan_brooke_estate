@@ -2,14 +2,15 @@ import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { HiOutlineBars3BottomRight } from "react-icons/hi2";
 import { RiCloseFill } from "react-icons/ri";
+import Images from "../constants/Images";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
 
   const activeLink =
-    "border-b-4 px-[2px] mr-[4px] font-bold border-[#ffcc00] text-[#071c48] text-[16px]";
+    "border-b-4 px-[2px] mr-[4px] font-bold border-[#B62931] text-[#071c48] text-[16px]";
   const normalLink =
-    "text-[#1f2937] hover:text-[#ffcc00] transition-colors";
+    "text-[#031F22] hover:text-[#B62931] transition-colors";
 
   const closeMenu = () => setOpen(false);
 
@@ -23,10 +24,11 @@ const Header = () => {
           onClick={closeMenu}
           className="flex items-center space-x-2 cursor-pointer"
         >
-          <div className="w-8 h-8 bg-gradient-to-br from-[#0b1120] to-[#ffcc00] rounded-md flex items-center justify-center shadow-sm">
-            <span className="text-[#fafafa] font-bold text-sm">SC</span>
+          <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-sm">
+            {/* <span className="text-[#fafafa] font-bold text-sm">SC</span> */}
+            <img src={Images.LogoImg} className=""/>
           </div>
-          <span className="font-bold text-xl text-[#1f2937]">SCCL</span>
+          {/* <span className="font-bold text-xl text-[#1f2937]">SCCL</span> */}
         </Link>
 
         {/* Mobile Toggle */}
@@ -46,9 +48,9 @@ const Header = () => {
         >
           {[
             { name: "Home", path: "/" },
+            { name: "Properties", path: "/properties" },
             { name: "About", path: "/about" },
-            { name: "Services", path: "/services" },
-            { name: "Team", path: "/team" },
+            // { name: "Team", path: "/team" },
             { name: "Contact", path: "/contact" },
           ].map((item) => (
             <li key={item.name} className="md:ml-8 my-4 md:my-0">
@@ -67,32 +69,32 @@ const Header = () => {
           {/* Mobile Buttons */}
           <li className="md:hidden mt-6 space-y-3">
             <Link to="/login" onClick={closeMenu}>
-              <button className="w-full border border-[#071c48] text-[#071c48] hover:bg-[#071c48] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+              <button className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
                 Login
               </button>
             </Link>
 
-            <Link to="/contact" onClick={closeMenu}>
+            {/* <Link to="/contact" onClick={closeMenu}>
               <button className="w-full bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
                 Get Started
               </button>
-            </Link>
+            </Link> */}
           </li>
         </ul>
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center gap-4">
           <Link to="/login">
-            <button className="border border-[#071c48] text-[#071c48] hover:bg-[#071c48] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+            <button className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
               Login
             </button>
           </Link>
 
-          <Link to="/contact">
+          {/* <Link to="/contact">
             <button className="bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
               Get Started
             </button>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </header>
