@@ -30,11 +30,11 @@ const HeroSection = () => {
           {/* Heading */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-[#f5f5f5] leading-tight mb-6 animate-slide-up">
             Find Your Perfect
-            <span className="block text-[#BE7074]">Property Today</span>
+            <span className="block text-[#e5383b]">Property Today</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg text-[#e5e5e5] mb-8 max-w-xl animate-slide-up delay-100">
+          <p className="text-lg text-[#ced4da] tracking-[0.5px] mb-8 max-w-xl animate-slide-up delay-100">
             Discover premium properties for sale and rent. From luxury apartments
             to commercial spaces, we have everything you need.
           </p>
@@ -45,7 +45,7 @@ const HeroSection = () => {
             <div className="flex gap-2 mb-4">
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#BE7074] text-[#f5f5f5] font-poppins font-light text-sm "
+                className="flex items-center gap-2 px-4 py-2 font-inter tracking-[0.5px] rounded-lg bg-[#e5383b] text-[#f5f5f5] font-light text-sm "
               >
                 <Home className="w-4 h-4" color="#f5f5f5" />
                 Buy
@@ -53,9 +53,9 @@ const HeroSection = () => {
 
               <button
                 type="button"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#BE7074] text-[#f5f5f5] text-sm font-medium hover:bg-secondary/80 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg tracking-[0.5px] bg-[#e5e5e5] font-inter text-[#000505] text-sm font-medium hover:bg-[#e5e5e5]/80 transition-[#e5e5e5]"
               >
-                <Building className="w-4 h-4" color="#f5f5f5" />
+                <Building className="w-4 h-4" color="#000505" />
                 Rent
               </button>
             </div>
@@ -63,27 +63,27 @@ const HeroSection = () => {
             {/* Inputs */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#f5f5f5]" />
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" color="#000505" />
                 <input
                   type="text"
                   placeholder="Location"
-                  className="w-full h-12 rounded-xl border border-border bg-[#ffffff] px-12 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="w-full h-12 rounded-xl border border-border bg-[#ffffff]  border-none shadow-2xl px-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#f8f7ff]"
                 />
               </div>
 
               <div className="relative">
-                <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#f5f5f5]" />
+                <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5" color="#000505" />
                 <input
                   type="text"
                   placeholder="Property Type"
-                  className="w-full h-12 rounded-xl border border-border bg-background px-12 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="w-full h-12 rounded-xl border border-border bg-[#ffffff]  border-none shadow-2xl px-12 text-sm focus:outline-none focus:ring-2 focus:ring-[#f8f7ff]"
                 />
               </div>
 
               <Link to="/properties">
                 <button
                   type="button"
-                  className="w-full h-12 rounded-xl bg-[#BE7074] text-[#ffffff] leading-1 tracking-normal font-medium flex items-center justify-center gap-2 hover:bg-accent/90 transition-colors"
+                  className="w-full h-12 rounded-xl bg-[#e5383b] font-inters tracking-[0.5px] text-[#ffffff] leading-1  font-medium flex items-center justify-center gap-2 hover:bg-accent/90 transition-colors"
                 >
                   <Search className="w-5 h-5" color="#ffffff" />
                   Search Properties
@@ -100,10 +100,10 @@ const HeroSection = () => {
               { value: "50+", label: "Expert Agents" },
             ].map((stat) => (
               <div key={stat.label} className="text-center md:text-left">
-                <div className="text-3xl font-display font-bold text-primary-foreground">
+                <div className="text-3xl tracking-[#0.2px] font-inter font-display font-extrabold text-[#ced4da]">
                   {stat.value}
                 </div>
-                <div className="text-sm text-primary-foreground/60">
+                <div className="text-sm text-[#ced4da]/60 font-medium tracking-[0.3px] font-inter">
                   {stat.label}
                 </div>
               </div>
@@ -113,7 +113,7 @@ const HeroSection = () => {
       </div>
 
       {/* Bottom Gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#e5e5e5] to-transparent" />
     </section>
   );
 };

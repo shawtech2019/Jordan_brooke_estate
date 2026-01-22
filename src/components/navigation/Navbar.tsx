@@ -8,7 +8,7 @@ const Header = () => {
   const [open, setOpen] = useState(false);
 
   const activeLink =
-    "border-b-4 px-[2px] mr-[4px] font-bold border-[#B62931] text-[#071c48] text-[16px]";
+    "border-b-4 px-[2px] mr-[4px] font-bold border-[#B62931] text-[#071c48] text-[14px]";
   const normalLink =
     "text-[#031F22] hover:text-[#B62931] transition-colors";
 
@@ -25,10 +25,8 @@ const Header = () => {
           className="flex items-center space-x-2 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-md flex items-center justify-center shadow-sm">
-            {/* <span className="text-[#fafafa] font-bold text-sm">SC</span> */}
             <img src={Images.LogoImg} className=""/>
           </div>
-          {/* <span className="font-bold text-xl text-[#1f2937]">SCCL</span> */}
         </Link>
 
         {/* Mobile Toggle */}
@@ -53,7 +51,7 @@ const Header = () => {
             // { name: "Team", path: "/team" },
             { name: "Contact", path: "/contact" },
           ].map((item) => (
-            <li key={item.name} className="md:ml-8 my-4 md:my-0">
+            <li key={item.name} className="md:ml-8 text-[14px] font-display my-4 md:my-0">
               <NavLink
                 to={item.path}
                 onClick={closeMenu}
