@@ -1,10 +1,52 @@
 import { Mail, ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import Images from "../../../components/constants/Images";
+import { Link, useNavigate } from "react-router-dom";
+import Images from "../../constants/Images";
+import { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+
+interface ErrorResponse {
+  message: string
+}
 
 const ForgotPassword = () => {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+ 
+
+  const  handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      toast.error("Please enter your email address")
+    }
+    try {
+      setLoading(true);
+
+      const response = await  axios.post("/api/auth/forgot-password", {email});
+      toast.success(
+        response.data?.message || "Reset code sent successfully"
+      )
+      setTimeout(() => {
+        navigate("/enter-code", {state: {email}});
+      }, 1500);
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ErrorResponse>(error)) {
+        toast.error(
+          error.response?.data?.message || "Failed to send reset  code"
+        );
+      } else {
+        toast.error("Unexpected error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <ToastContainer position="top-right" autoClose={3000} />
       {/* Background */}
       <div className="absolute inset-0">
         <img
@@ -59,13 +101,15 @@ const ForgotPassword = () => {
               Reset Password
             </h2>
 
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email */}
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
                   type="email"
-                  placeholder="Enter your email address or phone number"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
               </div>
@@ -74,9 +118,10 @@ const ForgotPassword = () => {
               <Link to={"/enter-code"}>
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
               >
-                Send Reset Code
+               {loading ? "Sending..." : "Send Reset Code"}
               </button>
               </Link>
             </form>

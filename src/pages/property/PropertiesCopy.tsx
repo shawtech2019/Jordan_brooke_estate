@@ -2,7 +2,7 @@
    IMPORTS
 ====================================================== */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Bed,
@@ -23,75 +23,137 @@ import Images from "../../components/constants/Images";
    TYPES
 ====================================================== */
 
-export type ViewMode = "grid" | "list";
-export type PropertyCategory = "sale" | "rent";
-export type PropertyStatus = "available" | "rented";
-export type PropertyType = "Residential" | "Commercial";
+type ViewMode = "grid" | "list";
+type PropertyCategory = "sale" | "rent" | "all";
 
 export interface Property {
   id: number;
   title: string;
   location: string;
+  address?: string;
   price: string;
   priceLabel: string;
   beds: number;
   baths: number;
-  sqft: number;
-  image: string;
-  status: PropertyStatus;
-  type: PropertyType;
-  category: PropertyCategory;
-}
-
-interface PaginatedResult<T> {
-  items: T[];
-  totalItems: number;
-  totalPages: number;
-}
-
-/* ======================================================
-   HELPERS
-====================================================== */
-
-const PAGE_SIZE = 6;
-
-const paginate = <T,>(
-  data: T[],
-  page: number,
-  pageSize: number
-): PaginatedResult<T> => {
-  const start = (page - 1) * pageSize;
-
-  return {
-    items: data.slice(start, start + pageSize),
-    totalItems: data.length,
-    totalPages: Math.max(1, Math.ceil(data.length / pageSize)),
+  sqft: string;
+  image: string;        // cover image
+  images: string[];     // multiple images
+  status: "available" | "rented";
+  type: "Residential" | "Commercial";
+  category: "sale" | "rent";
+  description?: string;
+  features?: string[];
+  agent?: {
+    name: string;
+    phone: string;
+    email: string;
   };
-};
+}
 
 /* ======================================================
-   MOCK DATA
+   MOCK DATA (API READY)
 ====================================================== */
 
-const PROPERTIES: Property[] = Array.from({ length: 30 }, (_, i) => ({
-  id: i + 1,
-  title: `Premium Property ${i + 1}`,
-  location: i % 2 === 0 ? "Downtown Metro" : "Green Valley",
-  price: i % 3 === 0 ? "$1,250,000" : "$3,500 / mo",
-  priceLabel: i % 3 === 0 ? "For Sale" : "For Rent",
-  beds: (i % 5) + 1,
-  baths: (i % 3) + 1,
-  sqft: 1200 + i * 120,
-  image:
-    i % 3 === 0
-      ? Images.PropertiesImgOne
-      : i % 3 === 1
-      ? Images.PropertiesImgTwo
-      : Images.PropertiesImgThree,
-  status: i % 4 === 0 ? "rented" : "available",
-  type: i % 2 === 0 ? "Residential" : "Commercial",
-  category: i % 3 === 0 ? "sale" : "rent",
-}));
+const PROPERTIES: Property[] = [
+  {
+    id: 1,
+    title: "Modern Luxury Penthouse",
+    location: "Downtown Metro",
+    address: "123 Skyline Avenue, Downtown Metro",
+    price: "$1,250,000",
+    priceLabel: "For Sale",
+    beds: 4,
+    baths: 3,
+    sqft: "3,200",
+    image: Images.PropertiesImgOne,
+    images: [
+      Images.PropertiesImgOne,
+      Images.PropertiesImgTwo,
+      Images.PropertiesImgThree,
+    ],
+    status: "available",
+    type: "Residential",
+    category: "sale",
+    description:
+      "Luxury penthouse with panoramic city views and smart home features.",
+    features: [
+      "Smart Home System",
+      "Private Terrace",
+      "24/7 Security",
+      "Gym & Spa",
+    ],
+    agent: {
+      name: "Sarah Johnson",
+      phone: "+1 555 123 4567",
+      email: "sarah@irems.com",
+    },
+  },
+  {
+    id: 2,
+    title: "Suburban Family Home",
+    location: "Green Valley",
+    address: "456 Oak Lane, Green Valley",
+    price: "$3,500 / mo",
+    priceLabel: "For Rent",
+    beds: 5,
+    baths: 4,
+    sqft: "4,100",
+    image: Images.PropertiesImgTwo,
+    images: [
+      Images.PropertiesImgTwo,
+      Images.PropertiesImgOne,
+      Images.PropertiesImgThree,
+    ],
+    status: "available",
+    type: "Residential",
+    category: "rent",
+    description:
+      "Spacious family home in a quiet neighborhood with modern interiors.",
+    features: [
+      "Large Backyard",
+      "Garage",
+      "Home Office",
+      "Central AC",
+    ],
+    agent: {
+      name: "Michael Chen",
+      phone: "+1 555 234 5678",
+      email: "michael@irems.com",
+    },
+  },
+  {
+    id: 3,
+    title: "Premium Office Space",
+    location: "Business District",
+    address: "789 Corporate Blvd",
+    price: "$8,500 / mo",
+    priceLabel: "For Rent",
+    beds: 0,
+    baths: 2,
+    sqft: "5,500",
+    image: Images.PropertiesImgThree,
+    images: [
+      Images.PropertiesImgThree,
+      Images.PropertiesImgOne,
+      Images.PropertiesImgTwo,
+    ],
+    status: "available",
+    type: "Commercial",
+    category: "rent",
+    description:
+      "High-end commercial office space ideal for corporate headquarters.",
+    features: [
+      "High-Speed Internet",
+      "Conference Rooms",
+      "Parking Space",
+    ],
+    agent: {
+      name: "David Smith",
+      phone: "+1 555 789 4561",
+      email: "david@irems.com",
+    },
+  },
+];
 
 /* ======================================================
    COMPONENT
@@ -99,47 +161,23 @@ const PROPERTIES: Property[] = Array.from({ length: 30 }, (_, i) => ({
 
 const Properties = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [category, setCategory] = useState<PropertyCategory | "all">("all");
+  const [category, setCategory] = useState<PropertyCategory>("all");
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-
-  /* Reset page when filters change */
-  useEffect(() => {
-    setPage(1);
-  }, [category, search]);
-
-  /* ======================================================
-     FILTERED DATA
-  ====================================================== */
 
   const filteredProperties = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+    const keyword = search.toLowerCase().trim();
 
     return PROPERTIES.filter((property) => {
       const matchesCategory =
         category === "all" || property.category === category;
 
       const matchesSearch =
-        !keyword ||
         property.title.toLowerCase().includes(keyword) ||
         property.location.toLowerCase().includes(keyword);
 
       return matchesCategory && matchesSearch;
     });
   }, [category, search]);
-
-  /* ======================================================
-     PAGINATION
-  ====================================================== */
-
-  const pagination = useMemo(
-    () => paginate(filteredProperties, page, PAGE_SIZE),
-    [filteredProperties, page]
-  );
-
-  /* ======================================================
-     RENDER
-  ====================================================== */
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -155,7 +193,6 @@ const Properties = () => {
 
           {/* FILTER BAR */}
           <section className="bg-white p-4 rounded-xl shadow-sm mb-8 flex flex-col lg:flex-row gap-4">
-            {/* SEARCH */}
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -166,15 +203,12 @@ const Properties = () => {
               />
             </div>
 
-            {/* CATEGORY */}
             <div className="flex gap-2">
-              {["all", "sale", "rent"].map((value) => (
+              {(["all", "sale", "rent"] as const).map((value) => (
                 <button
                   key={value}
-                  onClick={() =>
-                    setCategory(value as PropertyCategory | "all")
-                  }
-                  className={`px-4 h-12 rounded-lg border transition ${
+                  onClick={() => setCategory(value)}
+                  className={`px-4 h-12 rounded-lg border ${
                     category === value
                       ? "bg-blue-600 text-white"
                       : "hover:bg-gray-100"
@@ -189,7 +223,6 @@ const Properties = () => {
               ))}
             </div>
 
-            {/* VIEW MODE */}
             <div className="flex border rounded-lg overflow-hidden">
               <button
                 onClick={() => setViewMode("grid")}
@@ -217,10 +250,10 @@ const Properties = () => {
 
           {/* RESULTS */}
           <p className="text-sm text-gray-500 mb-6">
-            Showing {pagination.totalItems} results
+            Showing {filteredProperties.length} results
           </p>
 
-          {/* PROPERTY LIST */}
+          {/* PROPERTY GRID */}
           <section
             className={`grid gap-6 ${
               viewMode === "grid"
@@ -228,7 +261,7 @@ const Properties = () => {
                 : "grid-cols-1"
             }`}
           >
-            {pagination.items.map((property) => (
+            {filteredProperties.map((property) => (
               <Link
                 key={property.id}
                 to={`/properties/${property.id}`}
@@ -294,25 +327,6 @@ const Properties = () => {
               </Link>
             ))}
           </section>
-
-          {/* PAGINATION */}
-          {pagination.totalPages > 1 && (
-            <nav className="flex justify-center gap-2 mt-12">
-              {Array.from({ length: pagination.totalPages }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i + 1)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    page === i + 1
-                      ? "bg-blue-600 text-white"
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </nav>
-          )}
         </div>
       </main>
 

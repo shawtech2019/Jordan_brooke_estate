@@ -55,7 +55,7 @@ import Images from "../../../components/constants/Images";
   const FeaturedProperties = () => {
     return (
       <section className="py-20  bg-[#f5f5f5]">
-       <section className="flex items-center justify-center lg:px-[4rem] md:px-[2rem] px-[">
+       <section className="flex items-center justify-center lg:px-[4rem] md:px-[2rem]">
        <div className="container-wide max-w-7xl  lg:px-0 md:px-8 px-2 mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row items-center md:items-end justify-between gap-6 mb-12">
@@ -116,7 +116,7 @@ import Images from "../../../components/constants/Images";
   
                     {/* Price */}
                     <div className="absolute bottom-4 left-4">
-                      <div className="text-2xl font-display font-bold shadow text-[#fefcfd]">
+                      <div className="text-2xl font-display font-extrabold shadow text-[#ffffff]">
                         {property.price}
                       </div>
                       <div className="text-sm font-display text-[#fefcfd]/90">

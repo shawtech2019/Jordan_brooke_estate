@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Images from "../../../components/constants/Images";
+import Images from "../../constants/Images";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 

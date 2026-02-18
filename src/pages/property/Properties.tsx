@@ -296,7 +296,7 @@ const Properties = () => {
                   setCurrentPage(1);
                 }}
                 placeholder="Search by title or location"
-                className="w-full h-12 pl-12 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full h-12 pl-12 border-[0.5px] border-[#c3bebe] shadow rounded-lg focus:ring-2 focus:ring-[#e5383b] outline-none"
               />
             </div>
 
@@ -310,7 +310,7 @@ const Properties = () => {
                   }}
                   className={`px-4 h-12 rounded-lg border ${
                     category === value
-                      ? "bg-blue-600 text-white"
+                      ? "bg-[#e5383b] border-[#c3bebe] border-[0.7px] text-white"
                       : "hover:bg-gray-100"
                   }`}
                 >
@@ -327,7 +327,7 @@ const Properties = () => {
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-3 ${
-                  viewMode === "grid" ? "bg-blue-600 text-white" : ""
+                  viewMode === "grid" ? "bg-[#e5383b] border-[0.8px] border-[#e0dbdb] text-white" : ""
                 }`}
               >
                 <Grid3X3 size={18} />
@@ -335,7 +335,7 @@ const Properties = () => {
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-3 ${
-                  viewMode === "list" ? "bg-blue-600 text-white" : ""
+                  viewMode === "list" ? "bg-[#e5383b] text-white" : ""
                 }`}
               >
                 <List size={18} />
@@ -362,7 +362,88 @@ const Properties = () => {
                 : "grid-cols-1"
             }`}
           >
-            {paginatedProperties.map((property) => (
+             {paginatedProperties.map((property, index) => (
+                          <Link
+                            to={`/properties/${property.id}`}
+                            key={property.id}
+                            className="animate-slide-up"
+                            style={{ animationDelay: `${index * 100}ms` }}
+                          >
+                            <div className="group rounded-2xl overflow-hidden border border-[#ced4da] bg-[#ffffff] shadow-lg hover:shadow-lg transition-shadow">
+                              {/* Image */}
+                              <div className="relative aspect-[4/3] overflow-hidden">
+                                <img
+                                  src={property.image}
+                                  alt={property.title}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                />
+              
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#343a40]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              
+                                {/* Badges */}
+                                <div className="absolute top-4 left-4 flex gap-2">
+                                  <span className="px-3 py-1 text-xs font-medium font-inter rounded-full text-green-500 border-[1.5px] border-green-500/90">
+                                    {property.status}
+                                  </span>
+                                  <span className="px-3 py-1 text-xs font-medium rounded-full bg-[#ffffff] text-[#343a40] font-inter">
+                                    {property.type}
+                                  </span>
+                                </div>
+              
+                                {/* Favorite */}
+                                <button
+                                  type="button"
+                                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#ffffff]/90 backdrop-blur flex items-center justify-center text-[#343a40] hover:text-[#343a40] transition"
+                                >
+                                  <Heart className="w-5 h-5" />
+                                </button>
+              
+                                {/* Price */}
+                                <div className="absolute bottom-4 left-4">
+                                  <div className="text-2xl font-display font-bold shadow text-[#fefcfd]">
+                                    {property.price}
+                                  </div>
+                                  <div className="text-sm font-display text-[#fefcfd]/90">
+                                    {property.priceLabel}
+                                  </div>
+                                </div>
+                              </div>
+              
+                              {/* Content */}
+                              <div className="p-5">
+                                <h3 className="font-display font-semibold text-lg mb-2 group-hover:text-[#e5383b] transition-colors">
+                                  {property.title}
+                                </h3>
+              
+                                <div className="flex items-center gap-1.5 text-[#343a40] mb-4">
+                                  <MapPin className="w-4 h-4 text-[#e5383b]" />
+                                  <span className="text-sm">{property.location}</span>
+                                </div>
+              
+                                {/* Features */}
+                                <div className="flex items-center gap-4 pt-4 border-t  border-[#343a40]/20">
+                                  {property.beds > 0 && (
+                                    <div className="flex items-center gap-1.5 text-sm text-[#343a40]/80 font-display font-medium">
+                                      <Bed className="w-4 h-4" />
+                                      {property.beds} Beds
+                                    </div>
+                                  )}
+              
+                                  <div className="flex items-center gap-1.5 text-sm text-[#343a40]/80 font-display font-medium">
+                                    <Bath className="w-4 h-4" />
+                                    {property.baths} Baths
+                                  </div>
+              
+                                  <div className="flex items-center gap-1.5 text-sm text-[#343a40]/80 font-display font-medium">
+                                    <Square className="w-4 h-4" />
+                                    {property.sqft} sqft
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+            {/* {paginatedProperties.map((property) => (
               <Link
                 key={property.id}
                 to={`/properties/${property.id}`}
@@ -384,17 +465,17 @@ const Properties = () => {
                       className="w-full h-full object-cover"
                     />
                     <button className="absolute top-4 right-4 bg-white p-2 rounded-full shadow">
-                      <Heart size={18} />
+                      <Heart size={18} color="#e5383b" />
                     </button>
                   </div>
 
                   <div className="p-5 flex-1">
-                    <h3 className="font-semibold text-lg group-hover:text-blue-600">
+                    <h3 className="font-semibold text-lg tracking-[0.5px] text-[#000505] font-inter  group-hover:text-[#e5383b]">
                       {property.title}
                     </h3>
 
-                    <p className="flex items-center gap-1 text-sm text-gray-500 mb-3">
-                      <MapPin size={14} />
+                    <p className="flex items-center gap-1 font-inter text-sm text-gray-500 mb-3">
+                      <MapPin size={14} color="#E5383B" />
                       {property.location}
                     </p>
 
@@ -426,7 +507,7 @@ const Properties = () => {
                   </div>
                 </article>
               </Link>
-            ))}
+            ))} */}
           </section>
 
           {/* PAGINATION */}

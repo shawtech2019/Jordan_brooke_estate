@@ -14,8 +14,8 @@ const Footer = () => {
               // onClick={closeMenu}
               className="flex items-center space-x-2 cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm">
-                <img src={Images.LogoImg} className="" />
+              <div className="w-10 h-10 flex items-center justify-center shadow-sm">
+                <img src={Images.LogoImg} className="rounded-sm" />
               </div>
             </Link>
             {/* <Link to="/" className="flex items-center gap-2">

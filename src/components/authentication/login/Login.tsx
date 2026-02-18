@@ -1,14 +1,68 @@
 import { Mail, Lock, EyeOff, Eye } from "lucide-react";
-import Images from "../../../components/constants/Images";
-import { Link } from "react-router-dom";
+import Images from "../../constants/Images";
+import { Link, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundForward } from "react-icons/io";
-import { useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+
+type loginFormData = {
+  email: string;
+  password: string;
+}
+
+interface ErrorResponse {
+  message: string
+}
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
+  const [formData, setFormData] = useState<loginFormData> ({
+    email: "",
+    password: ""
+  })
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {(
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  )};
+
+  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      toast.error("All fields are required");
+      return;
+    }
+    try {
+      setLoading(true);
+      const res = await axios.post("/api/auth/login", formData)
+      //save token
+      localStorage.setItem("token", res.data.token);
+      toast.success("Login successful");
+      setTimeout(() => {
+        navigate("/dashboard")
+      }, 1200)
+    } catch (error: unknown) {
+      if (axios.isAxiosError<ErrorResponse>(error)) {
+        toast.error(
+          error.response?.data?.message || "Login failed Please try again."
+        );
+      } else {
+        toast.error("UUnexpected error occurred");
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <ToastContainer position="top-right" autoClose={3000}/>
       {/* Background */}
       <div className="absolute inset-0">
         <img
@@ -29,12 +83,15 @@ const Login = () => {
               Sign In
             </h2>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Email */}
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   placeholder="Email address"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
@@ -45,6 +102,9 @@ const Login = () => {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
                   placeholder="Password"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
@@ -69,9 +129,10 @@ const Login = () => {
               {/* Login Button */}
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
               >
-                Login
+               {loading ? "Logging in..." : "Login"}
               </button>
             </form>
 

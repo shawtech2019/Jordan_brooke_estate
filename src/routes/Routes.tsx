@@ -9,6 +9,8 @@ import ResetPassword from '../components/authentication/reset-password/ResetPass
 import EnterCode from '../components/authentication/enter-code/EnterCode';
 import Properties from '../pages/property/Properties';
 import PropertyDetail from '../pages/property/PropertiesDetails';
+import AboutUs from '../pages/about/AboutUs';
+import Contact from '../pages/contact/Contact';
 
 
 
@@ -24,6 +26,8 @@ const AppRoutes: React.FC = () => {
          <Route path="/" element={<Home />} />
          <Route path="properties" element={<Properties />} />
          <Route path="/properties/:id" element={<PropertyDetail />} />
+         <Route path="about" element={<AboutUs />} />
+         <Route path="contact" element={<Contact />} />
          <Route path="login" element={<Login />} />
          <Route path="register" element={<Register />} />
          <Route path="forgot-password" element={<ForgotPassword />} />

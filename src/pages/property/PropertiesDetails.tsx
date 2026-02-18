@@ -151,30 +151,32 @@ const PROPERTIES: Property[] = [
 ====================================================== */
 
 const PropertyDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const [activeImage, setActiveImage] = useState(0);
+  const { id } = useParams<{ id: string }>()
+  const [activeImage, setActiveImage] = useState(0)
 
-  const property = useMemo<Property | undefined>(() => {
-    if (!id) return undefined;
-    return PROPERTIES.find((item) => item.id === Number(id));
-  }, [id]);
+  const property = useMemo(
+    () => PROPERTIES.find((p) => p.id === Number(id)),
+    [id]
+  )
 
   if (!property) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <p className="text-xl font-semibold">Property not found</p>
+        <p className="text-xl font-semibold text-[#031F22]">
+          Property not found
+        </p>
       </main>
-    );
+    )
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f8f9fa]">
       <main className="pt-24 pb-20">
-        <div className="container mx-auto px-4">
-          {/* BACK */}
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Back */}
           <Link
             to="/properties"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+            className="inline-flex items-center gap-2 text-gray-500 hover:text-[#031F22] mb-6"
           >
             <ArrowLeft size={16} />
             Back to Properties
@@ -182,10 +184,10 @@ const PropertyDetail = () => {
 
           <div className="grid lg:grid-cols-3 gap-10">
             {/* LEFT */}
-            <section className="lg:col-span-2 space-y-8">
-              {/* IMAGE GALLERY */}
+            <section className="lg:col-span-2 space-y-10">
+              {/* Gallery */}
               <div className="space-y-4">
-                <div className="rounded-2xl overflow-hidden relative">
+                <div className="relative rounded-2xl overflow-hidden">
                   <img
                     src={property.images[activeImage]}
                     alt={property.title}
@@ -206,52 +208,54 @@ const PropertyDetail = () => {
                 <div className="grid grid-cols-3 gap-4">
                   {property.images.map((img, index) => (
                     <button
-                      key={index}
+                      key={img}
                       onClick={() => setActiveImage(index)}
-                      className={`rounded-xl overflow-hidden border-2 ${
+                      className={`rounded-xl overflow-hidden border-2 transition ${
                         activeImage === index
-                          ? "border-primary"
+                          ? "border-[#e5383b]"
                           : "border-transparent"
                       }`}
                     >
                       <img
                         src={img}
                         alt={`View ${index + 1}`}
-                        className="h-32 w-full object-cover"
+                        className="h-28 w-full object-cover"
                       />
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* DETAILS */}
+              {/* Details */}
               <div>
-                <h1 className="text-3xl font-bold">{property.title}</h1>
+                <h1 className="text-3xl font-bold text-[#031F22]">
+                  {property.title}
+                </h1>
 
                 <div className="flex items-center gap-2 text-gray-500 mt-2">
                   <MapPin size={16} />
                   {property.address}
                 </div>
 
-                <div className="flex gap-6 mt-6">
+                <div className="flex gap-8 mt-6">
                   <Info icon={<Bed />} label="Beds" value={property.beds} />
                   <Info icon={<Bath />} label="Baths" value={property.baths} />
                   <Info icon={<Square />} label="Sq Ft" value={property.sqft} />
                 </div>
 
-                <p className="mt-6 text-gray-600">
+                <p className="mt-6 text-gray-600 leading-relaxed">
                   {property.description}
                 </p>
 
-                <div className="mt-8">
-                  <h3 className="font-semibold text-lg mb-4">
+                <div className="mt-10">
+                  <h3 className="font-semibold text-lg mb-4 text-[#031F22]">
                     Features & Amenities
                   </h3>
                   <ul className="grid sm:grid-cols-2 gap-3">
                     {property.features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
-                        <Check size={16} className="text-primary" />
-                        {feature}
+                        <Check size={16} className="text-[#e5383b]" />
+                        <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -261,9 +265,9 @@ const PropertyDetail = () => {
 
             {/* SIDEBAR */}
             <aside className="sticky top-28 h-fit">
-              <div className="border rounded-2xl p-6 space-y-6">
+              <div className="bg-white border-none rounded-2xl p-6 space-y-6 shadow">
                 <div>
-                  <div className="text-2xl font-bold text-primary">
+                  <div className="text-2xl font-bold text-[#e5383b]">
                     {property.price}
                   </div>
                   <span className="text-sm text-gray-500">
@@ -271,19 +275,19 @@ const PropertyDetail = () => {
                   </span>
                 </div>
 
-                <button className="btn-primary">
+                <button className="w-full flex items-center justify-center gap-2 bg-[#e5383b] text-white py-3 rounded-lg font-semibold hover:bg-[#c72f32] transition">
                   <Calendar size={16} />
                   Schedule Viewing
                 </button>
 
-                <button className="btn-outline">
+                <button className="w-full flex items-center justify-center gap-2 border border-[#e5383b] text-[#e5383b] py-3 rounded-lg font-semibold hover:bg-[#e5383b]/10 transition">
                   <Mail size={16} />
                   Contact Agent
                 </button>
 
                 <div className="border-t pt-4">
                   <p className="text-sm text-gray-500 mb-2">Listed by</p>
-                  <div className="font-semibold">
+                  <div className="font-semibold rounded-[50px text-[#031F22]">
                     {property.agent.name}
                   </div>
                   <div className="text-sm text-gray-500 flex items-center gap-2">
@@ -303,8 +307,8 @@ const PropertyDetail = () => {
 
       <Footer />
     </div>
-  );
-};
+  )
+}
 
 /* ======================================================
    SUB COMPONENTS
@@ -315,29 +319,29 @@ const Info = ({
   label,
   value,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
+  icon: React.ReactNode
+  label: string
+  value: number | string
 }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2 text-[#031F22]">
     {icon}
     <div>
       <div className="font-semibold">{value}</div>
       <div className="text-sm text-gray-500">{label}</div>
     </div>
   </div>
-);
+)
 
 const Badge = ({ label }: { label: string }) => (
-  <span className="px-3 py-1 text-xs rounded-full bg-black/70 text-white">
+  <span className="px-3 py-1 text-xs rounded-full bg-black/70 text-white capitalize">
     {label}
   </span>
-);
+)
 
 const IconButton = ({ icon }: { icon: React.ReactNode }) => (
-  <button className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:opacity-80">
+  <button className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center hover:scale-105 transition">
     {icon}
   </button>
-);
+)
 
-export default PropertyDetail;
+export default PropertyDetail

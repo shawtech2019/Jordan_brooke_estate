@@ -1,14 +1,116 @@
 import { Mail, Lock, User, EyeOff, Eye } from "lucide-react";
-import Images from "../../../components/constants/Images";
+import Images from "../../constants/Images";
 import { IoIosArrowRoundForward } from "react-icons/io";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { httpPostWithoutToken } from "../../utils/api_utils";
+
+
+
+type RegisterFormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string
+}
+
+
 
 const Register = () => {
+ const navigate = useNavigate();
+
+ const [formData, setFormData] = useState<RegisterFormData>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
+ })
+  const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // handle input change 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({...prev, [id]: value}));
+    // setFormData({...formData, [e.target.id]: e.target.value});
+  };
+  // handle form submit
+  const validateForm = (): boolean => {
+    const { name, email, password, confirmPassword } = formData;
+
+    if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+      toast.error("All fields are required.");
+      return false;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address.");
+      return false;
+    }
+
+    if (!/^(?=.*[A-Za-z])(?=.*\d).{6,}$/.test(password)) {
+      toast.error(
+        "Password must be at least 6 characters and include a number."
+      );
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    if (!validateForm()) return;
+  
+    setLoading(true);
+  
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+    };
+  
+    const response = await httpPostWithoutToken(
+      "auth/register",
+      payload
+    );
+  
+    // If backend returned error (from http_utils)
+    if (response?.error) {
+      toast.error(response.message || "Registration failed.");
+      setLoading(false);
+      return;
+    }
+  
+    // Success
+    toast.success(response?.message || "Registration successful.");
+  
+    localStorage.setItem("otp_email", formData.email);
+  
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
+  
+    setTimeout(() => navigate("/verify-otp"), 1200);
+  
+    setLoading(false);
+  };
+  
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
       {/* Background */}
       <div className="absolute inset-0">
         <img
@@ -31,11 +133,15 @@ const Register = () => {
               Create Account
             </h2>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Full Name */}
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
+                  id="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                   type="text"
                   placeholder="Full name"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
@@ -46,7 +152,11 @@ const Register = () => {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
+                  id="email"
                   type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
                   placeholder="Email address"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
@@ -56,7 +166,11 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
                   placeholder="Password"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
@@ -72,6 +186,10 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
+                  id="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm password"
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
@@ -87,9 +205,10 @@ const Register = () => {
               {/* Register Button */}
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
               >
-                Create Account
+               {loading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
 
