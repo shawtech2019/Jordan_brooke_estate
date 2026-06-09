@@ -1,0 +1,23 @@
+import TopHeader from "../tenant_admin_layout/TopHeader"
+import Sidebar from "./Sidebar"
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface LandlordAdminLayoutProps { element: any}
+
+const LandlordAdminLayout = ({element}: LandlordAdminLayoutProps) => {
+  return (
+    <div className="flex min-h-screen bg-background">
+    <Sidebar />
+    <div className="flex-1 flex flex-col">
+      <TopHeader />
+      <main className="flex-1 p-6 overflow-auto">
+      <section>
+          {element}
+        </section>
+      </main>
+    </div>
+  </div>
+  )
+}
+
+export default LandlordAdminLayout

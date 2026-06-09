@@ -15,6 +15,11 @@ type RegisterFormData = {
   confirmPassword: string
 }
 
+interface RegisterResponse {
+  message: string;
+  userId: string;
+}
+
 
 
 const Register = () => {
@@ -32,8 +37,8 @@ const Register = () => {
 
   // handle input change 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({...prev, [id]: value}));
+    const { name, value } = e.target;
+    setFormData((prev) => ({...prev, [name]: value}));
     // setFormData({...formData, [e.target.id]: e.target.value});
   };
   // handle form submit
@@ -69,43 +74,46 @@ const Register = () => {
     e.preventDefault();
   
     if (!validateForm()) return;
-  
-    setLoading(true);
-  
     const payload = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       password: formData.password,
     };
   
-    const response = await httpPostWithoutToken(
-      "auth/register",
-      payload
-    );
-  
-    // If backend returned error (from http_utils)
-    if (response?.error) {
-      toast.error(response.message || "Registration failed.");
+    try {
+      setLoading(true);
+    
+      const response = await httpPostWithoutToken<RegisterResponse>(
+        "auth/register",
+        payload
+      );
+    
+      if ("error" in response) {
+        toast.error(response.message ?? "Registration failed.");
+        return;
+      }
+    
+      // Success
+      toast.success(response.message ?? "Registration successful.");
+    
+      localStorage.setItem("otp_email", formData.email);
+    
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    
+      setTimeout(() => {
+        navigate(`/verify-otp?u=${encodeURIComponent(formData.email)}`);
+      }, 1200);
+    
+    } finally {
       setLoading(false);
-      return;
     }
-  
-    // Success
-    toast.success(response?.message || "Registration successful.");
-  
-    localStorage.setItem("otp_email", formData.email);
-  
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    });
-  
-    setTimeout(() => navigate("/verify-otp"), 1200);
-  
-    setLoading(false);
-  };
+
+  }
   
 
   return (
@@ -138,7 +146,7 @@ const Register = () => {
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
-                  id="name"
+                  name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
@@ -152,7 +160,7 @@ const Register = () => {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
-                  id="email"
+                  name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
@@ -166,7 +174,7 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
-                  id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
@@ -186,7 +194,7 @@ const Register = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#6c757d]" />
                 <input
-                  id="confirmPassword"
+                  name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required

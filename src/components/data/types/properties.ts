@@ -38,3 +38,18 @@ export interface Agent {
     total: number;
   }
   
+  export type PageType = 
+  | 'dashboard'
+  | 'properties'
+  | 'property-detail'
+  | 'units'
+  | 'unit-edit'
+  | 'lease-detail'
+  | 'tenants'
+  | 'lease'
+  | 'payments'
+  | 'maintenance'
+  | 'reports'
+  | 'notifications'
+  | 'settings'
+  ;

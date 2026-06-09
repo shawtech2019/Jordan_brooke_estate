@@ -3,66 +3,75 @@ import Images from "../../constants/Images";
 import { Link, useNavigate } from "react-router-dom";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import React, { useState } from "react";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { httpPostWithoutToken } from "../../utils/api_utils";
 
-type loginFormData = {
+type LoginFormData = {
   email: string;
   password: string;
-}
+};
 
-interface ErrorResponse {
-  message: string
+interface ApiResponse {
+  status: "success" | "error";
+  token?: string;
+  message?: string;
 }
 
 const Login = () => {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<loginFormData> ({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: "",
-    password: ""
-  })
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {(
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
-    })
-  )};
+      [e.target.name]: e.target.value,
+    });
+  };
 
-  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!formData.email || !formData.password) {
       toast.error("All fields are required");
       return;
     }
+
     try {
       setLoading(true);
-      const res = await axios.post("/api/auth/login", formData)
-      //save token
-      localStorage.setItem("token", res.data.token);
-      toast.success("Login successful");
-      setTimeout(() => {
-        navigate("/dashboard")
-      }, 1200)
-    } catch (error: unknown) {
-      if (axios.isAxiosError<ErrorResponse>(error)) {
-        toast.error(
-          error.response?.data?.message || "Login failed Please try again."
-        );
+
+      const response = await httpPostWithoutToken<ApiResponse>(
+        "auth/login",
+        formData
+      );
+
+      if (response.status === "success" && response.token) {
+        localStorage.setItem("token", response.token);
+        toast.success("Login successful");
+        setTimeout(() => navigate("/dashboard"), 1200);
       } else {
-        toast.error("UUnexpected error occurred");
+        toast.error(response.message ?? "Login failed. Please try again.");
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Unexpected error occurred");
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <ToastContainer position="top-right" autoClose={3000}/>
+      <ToastContainer position="top-right" autoClose={3000} />
+
       {/* Background */}
       <div className="absolute inset-0">
         <img
@@ -109,10 +118,11 @@ const Login = () => {
                   className="w-full h-12 rounded-xl bg-white px-12 text-sm shadow focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
                 />
                 <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute  right-4 top-1/2 -translate-y-1/2 text-[#6c757d]">
-                {showPassword ? <EyeOff /> : <Eye />}
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6c757d]"
+                >
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
 
@@ -132,7 +142,7 @@ const Login = () => {
                 disabled={loading}
                 className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
               >
-               {loading ? "Logging in..." : "Login"}
+                {loading ? "Logging in..." : "Login"}
               </button>
             </form>
 
@@ -174,7 +184,7 @@ const Login = () => {
 
             {/* Footer */}
             <p className="text-sm text-center text-gray-600 mt-6">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <Link to="/register">
                 <span className="text-[#e5383b] font-medium cursor-pointer">
                   Sign up
@@ -216,6 +226,7 @@ const Login = () => {
               <IoIosArrowRoundForward color="#ffffff" size={25} />
             </button>
           </div>
+
         </div>
       </div>
     </section>
