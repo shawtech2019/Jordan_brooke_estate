@@ -39,6 +39,13 @@ import LandlordMaintenancePage from "../components/landlord_admin/maintenance/La
 import ReportsPage from "../components/landlord_admin/report/ReportsPage";
 import LandlordNotificationsPage from "../components/landlord_admin/notification/LandlordNotificationPage";
 import LandlordSettingsPage from "../components/landlord_admin/setting/LandlordSettingsPage";
+import SystemSettings from "../components/system_admin_page/SystemSettings";
+// import SystemAdminLayoutProps from "../components/layout/system_admin/SystemAdminLayout";
+import SystemAdminLayout from "../components/layout/system_admin/SystemAdminLayout";
+import LogsAudits from "../components/system_admin_page/LogsAudits";
+import RolePermissions from "../components/system_admin_page/RolePermissions";
+import UserManagement from "../components/system_admin_page/UserManagement";
+import Support from "../components/system_admin_page/Support";
 
 
 
@@ -74,7 +81,12 @@ function Main() {
     "/tenants",
     "/landlord-maintenance",
     "/landlord-notifications",
-    "/landlord-settings"
+    "/landlord-settings",
+    "/system-settings",
+    "/logs",
+    "/users",
+    "/roles",
+    "/support"
 
   ];
   return (
@@ -174,7 +186,31 @@ function Main() {
         path="landlord-settings"
         element={<LandlordAdminLayout element={<LandlordSettingsPage/>} />}
       />
+       {/* System Admin dashboardd routes  */}
+       <Route 
+       path="system-settings"
+       element={<SystemAdminLayout  element={<SystemSettings/> } /> }
+       />
+       <Route
+       path="logs"
+       element={<SystemAdminLayout element={<LogsAudits />} />}
+       />
+       <Route
+       path="roles" 
+       element={<SystemAdminLayout element={<RolePermissions />} />}
+       />
+       <Route
+       path="users" 
+       element={<SystemAdminLayout element={<UserManagement />} />}
+       />
+       <Route
+       path="support" 
+       element={<SystemAdminLayout element={<Support />} />}
+       />
       </Routes>
+
+      {/* System Admin dashboardd routes  */}
+      
     </div>
   );
 }

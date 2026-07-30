@@ -66,7 +66,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Top stat cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-4 font-display">
         <div className="card p-5 bg-gray-900 text-white">
           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">Rent Due</p>
           <p className="text-2xl font-display font-bold mt-1">$1000</p>
