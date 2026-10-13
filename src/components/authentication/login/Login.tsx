@@ -15,6 +15,7 @@ interface ApiResponse {
   status: "success" | "error";
   token?: string;
   message?: string;
+  requiresRoleSelection?: boolean;
 }
 
 const Login = () => {
@@ -53,7 +54,15 @@ const Login = () => {
       if (response.status === "success" && response.token) {
         localStorage.setItem("token", response.token);
         toast.success("Login successful");
-        setTimeout(() => navigate("/dashboard"), 1200);
+        setTimeout(
+          () =>
+            navigate(
+              response.requiresRoleSelection
+                ? "/select-role"
+                : "/start-dashboard"
+            ),
+          1200
+        );
       } else {
         toast.error(response.message ?? "Login failed. Please try again.");
       }

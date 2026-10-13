@@ -25,6 +25,22 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 /**
+ * Normalise an axios error into a readable message.
+ */
+function toErrorMessage(err: unknown): Error {
+  const error = err as AxiosError<{ message?: string }>;
+
+  if (error.code === "ERR_NETWORK") {
+    return new Error("Network error. Please try again.");
+  }
+
+  const message =
+    error.response?.data?.message ?? error.message ?? "Something went wrong";
+
+  return new Error(message);
+}
+
+/**
  * POST request without auth token
  * - No config/options param to prevent unknown fields leaking into requests
  * - Throws on error so callers can catch properly
@@ -37,18 +53,41 @@ export async function httpPostWithoutToken<TResponse, TRequest = unknown>(
     const response = await apiClient.post<TResponse>(url, data);
     return response.data;
   } catch (err: unknown) {
-    const error = err as AxiosError<{ message?: string }>;
+    throw toErrorMessage(err);
+  }
+}
 
-    if (error.code === "ERR_NETWORK") {
-      throw new Error("Network error. Please try again.");
-    }
+/**
+ * GET request with the bearer token stored in localStorage.
+ */
+export async function httpGet<TResponse>(url: string): Promise<TResponse> {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await apiClient.get<TResponse>(
+      url,
+      token ? { headers: { Authorization: `Bearer ${token}` } } : undefined
+    );
+    return response.data;
+  } catch (err: unknown) {
+    throw toErrorMessage(err);
+  }
+}
 
-    const message =
-      error.response?.data?.message ??
-      error.message ??
-      "Something went wrong";
-
-    throw new Error(message);
+/**
+ * POST request that attaches the bearer token stored in localStorage.
+ */
+export async function httpPostWithToken<TResponse, TRequest = unknown>(
+  url: string,
+  data: TRequest
+): Promise<TResponse> {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await apiClient.post<TResponse>(url, data, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    return response.data;
+  } catch (err: unknown) {
+    throw toErrorMessage(err);
   }
 }
 

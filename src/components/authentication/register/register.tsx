@@ -1,4 +1,4 @@
-import { Mail, Lock, User, EyeOff, Eye } from "lucide-react";
+import { Mail, Lock, User, EyeOff, Eye, Loader2 } from "lucide-react";
 import Images from "../../constants/Images";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
@@ -82,34 +82,35 @@ const Register = () => {
   
     try {
       setLoading(true);
-    
+
       const response = await httpPostWithoutToken<RegisterResponse>(
         "auth/register",
         payload
       );
-    
-      if ("error" in response) {
-        toast.error(response.message ?? "Registration failed.");
-        return;
-      }
-    
+
       // Success
       toast.success(response.message ?? "Registration successful.");
-    
+
       localStorage.setItem("otp_email", formData.email);
-    
+
       setFormData({
         name: "",
         email: "",
         password: "",
         confirmPassword: "",
       });
-    
+
       setTimeout(() => {
         navigate(`/verify-otp?u=${encodeURIComponent(formData.email)}`);
       }, 1200);
-    
-    } finally {
+    } catch (error: unknown) {
+      // httpPostWithoutToken throws on failure — surface the backend
+      // error message (e.g. duplicate email, validation errors)
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
       setLoading(false);
     }
 
@@ -214,9 +215,12 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
+                className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-[#e5383b] flex items-center justify-center gap-2"
               >
-               {loading ? "Creating Account..." : "Create Account"}
+                {loading && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                {loading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
 

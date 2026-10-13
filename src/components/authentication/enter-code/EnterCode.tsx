@@ -1,10 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 import Images from "../../constants/Images";
 import { ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { httpPostWithoutToken } from "../../utils/api_utils";
+
+const OTP_LENGTH = 6;
 
 const EnterCode = () => {
-  const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [code, setCode] = useState<string[]>(Array(OTP_LENGTH).fill(""));
+  const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const email: string = (location.state as { email?: string } | null)?.email ?? "";
+
+  /* If someone lands here directly (no email), send them back to step 1. */
+  useEffect(() => {
+    if (!email) {
+      toast.error("Please enter your email to start password recovery.");
+      navigate("/forgot-password", { replace: true });
+    }
+  }, [email, navigate]);
 
   const handleChange = (value: string, index: number) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -13,7 +31,7 @@ const EnterCode = () => {
     updated[index] = value;
     setCode(updated);
 
-    if (value && index < 5) {
+    if (value && index < OTP_LENGTH - 1) {
       const nextInput = document.getElementById(
         `code-${index + 1}`
       ) as HTMLInputElement;
@@ -21,8 +39,48 @@ const EnterCode = () => {
     }
   };
 
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      const prevInput = document.getElementById(
+        `code-${index - 1}`
+      ) as HTMLInputElement;
+      prevInput?.focus();
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const otp = code.join("");
+    if (!/^\d{6}$/.test(otp)) {
+      toast.error("Please enter the 6-digit code.");
+      return;
+    }
+
+    navigate("/reset-password", { state: { email, otp } });
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    try {
+      setResending(true);
+      await httpPostWithoutToken("auth/forgot-password", { email });
+      toast.success("A new code has been sent to your email.");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to resend the code."
+      );
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <ToastContainer position="top-right" autoClose={3000} />
       {/* Background */}
       <div className="absolute inset-0">
         <img
@@ -47,43 +105,49 @@ const EnterCode = () => {
 
         {/* Description */}
         <p className="text-sm text-center text-gray-600 mb-6">
-          We’ve sent a 6-digit verification code to your email.
+          We’ve sent a 6-digit verification code to{" "}
+          <span className="font-medium text-[#031F22]">{email || "your email"}</span>.
           Please enter it below to continue.
         </p>
 
         {/* Code Inputs */}
-        <div className="flex justify-between gap-2 mb-6">
-          {code.map((digit, index) => (
-            <input
-              key={index}
-              id={`code-${index}`}
-              type="text"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(e.target.value, index)}
-              className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
-            />
-          ))}
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="flex justify-between gap-2 mb-6">
+            {code.map((digit, index) => (
+              <input
+                key={index}
+                id={`code-${index}`}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(e.target.value, index)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                className="w-12 h-12 text-center text-lg font-semibold rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#e5383b]"
+              />
+            ))}
+          </div>
 
-        {/* Verify Button */}
-       <Link to={"/reset-password"}>
-       <button
-          type="button"
-          className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
-        >
-          Verify Code
-        </button>
-       </Link>
+          {/* Verify Button */}
+          <button
+            type="submit"
+            className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
+          >
+            Verify Code
+          </button>
+        </form>
 
         {/* Resend */}
         <p className="text-sm text-center text-gray-600 mt-4">
           Didn’t receive the code?{" "}
-         <Link to={"/"}>
-         <button className="text-[#e5383b] font-medium hover:underline">
-            Resend
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resending}
+            className="text-[#e5383b] font-medium hover:underline disabled:opacity-60"
+          >
+            {resending ? "Resending..." : "Resend"}
           </button>
-         </Link>
         </p>
 
         {/* Back */}

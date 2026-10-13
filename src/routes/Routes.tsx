@@ -16,6 +16,8 @@ import PropertyDetail from "../pages/property/PropertiesDetails";
 import AboutUs from "../pages/about/AboutUs";
 import Contact from "../pages/contact/Contact";
 import AccountVerification from "../components/authentication/account-verification/AccountVerification";
+import SelectRole from "../components/authentication/select-role/SelectRole";
+import StartDashboard from "../components/authentication/start-dashboard/StartDashboard";
 import DashboardPage from "../components/tenant_admin/dashboard/DashboardPage";
 import NotFound from "../components/layout/page/NotFoundPage";
 import ScrollToTop from "../components/constants/ScrollToTop";
@@ -97,6 +99,8 @@ function Main() {
         <Route path="properties" element={<Properties />} />
         <Route path="/properties/:id" element={<PropertyDetail />} />
         <Route path="/verify-otp" element={<AccountVerification />} />
+        <Route path="/select-role" element={<SelectRole />} />
+        <Route path="/start-dashboard" element={<StartDashboard />} />
         <Route path="about" element={<AboutUs />} />
         <Route path="contact" element={<Contact />} />
         <Route path="login" element={<Login />} />

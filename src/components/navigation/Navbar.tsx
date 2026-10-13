@@ -1,11 +1,30 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineBars3BottomRight } from "react-icons/hi2";
 import { RiCloseFill } from "react-icons/ri";
 import Images from "../constants/Images";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    () => !!localStorage.getItem("token")
+  );
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Re-evaluate auth state whenever the route changes (e.g. after login/logout).
+  useEffect(() => {
+    setIsAuthenticated(!!localStorage.getItem("token"));
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("roles");
+    localStorage.removeItem("activeRole");
+    setOpen(false);
+    setIsAuthenticated(false);
+    navigate("/");
+  };
 
   const activeLink =
     "border-b-4 px-[2px] mr-[4px] font-bold border-[#B62931] text-[#071c48] text-[14px]";
@@ -66,11 +85,20 @@ const Header = () => {
 
           {/* Mobile Buttons */}
           <li className="md:hidden mt-6 space-y-3">
-            <Link to="/login" onClick={closeMenu}>
-              <button className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
-                Login
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
+              >
+                Logout
               </button>
-            </Link>
+            ) : (
+              <Link to="/login" onClick={closeMenu}>
+                <button className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+                  Login
+                </button>
+              </Link>
+            )}
 
             {/* <Link to="/contact" onClick={closeMenu}>
               <button className="w-full bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm">
@@ -82,11 +110,20 @@ const Header = () => {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login">
-            <button className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
-              Login
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
+            >
+              Logout
             </button>
-          </Link>
+          ) : (
+            <Link to="/login">
+              <button className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
+                Login
+              </button>
+            </Link>
+          )}
 
           {/* <Link to="/contact">
             <button className="bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm">

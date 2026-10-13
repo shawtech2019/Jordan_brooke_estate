@@ -2,12 +2,8 @@ import { Mail, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Images from "../../constants/Images";
 import { useState } from "react";
-import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-
-interface ErrorResponse {
-  message: string
-}
+import { httpPostWithoutToken, validateEmail } from "../../utils/api_utils";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -19,27 +15,37 @@ const ForgotPassword = () => {
   const  handleSubmit = async (e: React.FormEvent<HTMLFormElement>) =>  {
     e.preventDefault();
 
-    if (!email.trim()) {
-      toast.error("Please enter your email address")
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      toast.error("Please enter your email address");
+      return;
     }
+
+    if (!validateEmail(trimmedEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     try {
       setLoading(true);
 
-      const response = await  axios.post("/api/auth/forgot-password", {email});
-      toast.success(
-        response.data?.message || "Reset code sent successfully"
-      )
+      const response = await httpPostWithoutToken<{ message?: string }>(
+        "auth/forgot-password",
+        { email: trimmedEmail }
+      );
+
+      toast.success(response.message || "Reset code sent successfully");
+
       setTimeout(() => {
-        navigate("/enter-code", {state: {email}});
+        navigate("/enter-code", { state: { email: trimmedEmail } });
       }, 1500);
     } catch (error: unknown) {
-      if (axios.isAxiosError<ErrorResponse>(error)) {
-        toast.error(
-          error.response?.data?.message || "Failed to send reset  code"
-        );
-      } else {
-        toast.error("Unexpected error occurred");
-      }
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to send reset code"
+      );
     } finally {
       setLoading(false);
     }
@@ -115,15 +121,13 @@ const ForgotPassword = () => {
               </div>
 
               {/* Submit */}
-              <Link to={"/enter-code"}>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition"
+                className="w-full h-12 rounded-xl bg-[#e5383b] text-white font-medium tracking-wide hover:bg-accent/90 transition disabled:opacity-60"
               >
-               {loading ? "Sending..." : "Send Reset Code"}
+                {loading ? "Sending..." : "Send Reset Code"}
               </button>
-              </Link>
             </form>
 
             {/* Info */}
