@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type JSX, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, FileText, Layers, LayoutGrid, Mic, Search, Settings, User, X } from 'lucide-react'
+import { Bell, FileText, Layers, LayoutGrid, Menu, Mic, Search, Settings, User, X } from 'lucide-react'
 import { searchAll } from '../../data/search'
 import type { SearchResultType } from '../../data/types'
+import RoleSwitcher from '../RoleSwitcher'
 
 const typeIcon: Record<SearchResultType, JSX.Element> = {
   page: <LayoutGrid className="h-4 w-4" />,
@@ -16,7 +17,12 @@ const typeLabel: Record<SearchResultType, string> = {
   'role-permission': 'Permission',
 }
 
-export default function TopBar() {
+interface TopBarProps {
+  /** Shown only by layouts that want a mobile nav toggle. */
+  onMenuToggle?: () => void
+}
+
+export default function TopBar({ onMenuToggle }: TopBarProps) {
   const navigate = useNavigate()
   const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -76,7 +82,19 @@ export default function TopBar() {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-6 py-5 sm:flex-nowrap sm:gap-4">
+    <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 px-4 py-4 sm:flex-nowrap sm:gap-4 sm:px-6 sm:py-5">
+      {/* Mobile nav toggle — hidden on large screens where the sidebar shows */}
+      {onMenuToggle && (
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          aria-label="Open navigation menu"
+          className="lg:hidden shrink-0 rounded-md border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
+        >
+          <Menu className="h-4 w-4" />
+        </button>
+      )}
+
       <h1 className="mr-2 shrink-0 text-2xl font-bold tracking-tight text-slate-900">
         Admin Dashboard
       </h1>
@@ -170,12 +188,13 @@ export default function TopBar() {
         <Mic className="h-4 w-4" />
       </button>
 
-      <div className="flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-500">
+      <div className="hidden md:flex items-center gap-2 rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-500">
         <FileText className="h-4 w-4" />
         AI Assistant
       </div>
 
       <div className="ml-auto flex items-center gap-3">
+        <RoleSwitcher variant="outline" />
         <button
           type="button"
           aria-label="Notifications"
@@ -186,7 +205,7 @@ export default function TopBar() {
         <button
           type="button"
           aria-label="Settings"
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate('/admin/system-settings')}
           className="rounded-full border border-slate-200 p-2 text-slate-500 hover:bg-slate-50"
         >
           <Settings className="h-4 w-4" />

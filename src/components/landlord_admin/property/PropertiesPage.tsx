@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaCircleUser } from "react-icons/fa6";
+import { toast, ToastContainer } from "react-toastify";
 import {
   Eye,
   Pencil,
@@ -12,59 +14,60 @@ import {
 } from "lucide-react";
 
 import LandlordModal from "../../modal/LandlordModal";
+import { httpGet, resolveAssetUrl } from "../../utils/api_utils";
 
-const properties = [
-  {
-    id: 1,
-    name: "Greenwood Apartment",
-    location: "Austin, TX",
-    units: 300,
-    occ: "98%",
-    status: "Active",
-    type: "Apartment Building",
-    address: "1234 W 5th Ave, Austin, TX 78703",
-    income: "$56,000/mo",
-    image: "",
-  },
-  {
-    id: 2,
-    name: "Lake View Estate",
-    location: "Orlando, FL",
-    units: 50,
-    occ: "65%",
-    status: "Active",
-    type: "Apartment Building",
-    address: "89 Lake Shore Dr, Orlando, FL 32801",
-    income: "$18,000/mo",
-    image: "",
-  },
-  {
-    id: 3,
-    name: "Desert Heights",
-    location: "Phoenix, AZ",
-    units: 75,
-    occ: "88%",
-    status: "Inactive",
-    type: "Commercial",
-    address: "300 Desert Blvd, Phoenix, AZ 85001",
-    income: "$22,000/mo",
-    image: "",
-  },
-  {
-    id: 4,
-    name: "Chicago Prime",
-    location: "Chicago, IL",
-    units: 150,
-    occ: "72%",
-    status: "Active",
-    type: "Single Family",
-    address: "500 N Michigan Ave, Chicago, IL 60611",
-    income: "$42,000/mo",
-    image: "",
-  },
-];
+/** Shape returned by GET /api/investor/properties. */
+interface ApiProperty {
+  id: number;
+  title: string;
+  propertyType: string;
+  purpose: string;
+  price: number | null;
+  pricePeriod: string | null;
+  totalUnits: number | null;
+  status: string;
+  city: string | null;
+  state: string | null;
+  address: string | null;
+  images: string[];
+  videos: string[];
+}
 
-type Property = (typeof properties)[0];
+/** Row shape used by the table and modals. */
+interface Property {
+  id: number;
+  name: string;
+  location: string;
+  units: number;
+  status: string;
+  type: string;
+  purpose: string;
+  address: string;
+  income: string;
+  image: string;
+}
+
+const formatIncome = (p: ApiProperty): string => {
+  if (p.price === null) return "—";
+  const amount = `₦${Number(p.price).toLocaleString()}`;
+  if (p.purpose === "For Sale") return amount;
+  const period = (p.pricePeriod || "").replace("Per ", "").toLowerCase();
+  return period ? `${amount}/${period}` : amount;
+};
+
+/** Map an API property into the row shape the page renders. */
+const toDisplay = (p: ApiProperty): Property => ({
+  id: p.id,
+  name: p.title,
+  location: [p.city, p.state].filter(Boolean).join(", ") || "—",
+  units: p.totalUnits ?? 0,
+  status: p.status || "Active",
+  type: p.propertyType || "—",
+  purpose: p.purpose || "—",
+  address: p.address || "",
+  income: formatIncome(p),
+  image: p.images?.[0] ? resolveAssetUrl(p.images[0]) : "",
+});
 
 function ViewPropertyModal({
   prop,
@@ -114,9 +117,9 @@ function ViewPropertyModal({
         <div className="grid grid-cols-2 gap-3">
           {[
             ["Total Units", prop.units],
-            ["Occupancy Rate", prop.occ],
             ["Property Type", prop.type],
-            ["Monthly Income", prop.income],
+            ["Price", prop.income],
+            ["Purpose", prop.purpose],
           ].map(([label, value]) => (
             <div
               key={String(label)}
@@ -274,238 +277,8 @@ function EditPropertyModal({
   );
 }
 
-function AddPropertyModal({
-  onClose,
-  onAdd,
-}: {
-  onClose: () => void;
-  onAdd: (p: Property) => void;
-}) {
-  const [form, setForm] = useState({
-    name: "",
-    location: "",
-    address: "",
-    units: "",
-    status: "Active" as "Active" | "Inactive",
-    type: "Apartment Building",
-    price: "",
-    beds: "",
-    baths: "",
-    sqft: "",
-    image: null as File | null,
-  });
-
-  const [preview, setPreview] = useState<string | null>(null);
-
-  const handleImageChange = (file: File | null) => {
-    if (!file) return;
-
-    const url = URL.createObjectURL(file);
-
-    setPreview(url);
-
-    setForm((prev) => ({
-      ...prev,
-      image: file,
-    }));
-  };
-
-  const handleAdd = () => {
-    const newProp: Property = {
-      id: Date.now(),
-      name: form.name,
-      location: form.location,
-      address: form.address,
-      units: Number(form.units) || 0,
-      occ: "0%",
-      status: form.status,
-      type: form.type,
-      income: "$0/mo",
-      image: preview || "",
-    };
-
-    onAdd(newProp);
-    onClose();
-  };
-
-  return (
-    <LandlordModal
-      title="Add Property"
-      onClose={onClose}
-      size="lg"
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-4">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">
-              Property Image
-            </label>
-
-            <div className="relative border-2 border-dashed rounded-xl h-40 overflow-hidden">
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  Upload Image
-                </div>
-              )}
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  handleImageChange(
-                    e.target.files?.[0] || null
-                  )
-                }
-                className="absolute inset-0 opacity-0 cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              placeholder="Title"
-              className="input"
-              value={form.name}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  name: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Location"
-              className="input"
-              value={form.location}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  location: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Price"
-              className="input"
-              value={form.price}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  price: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Units"
-              type="number"
-              className="input"
-              value={form.units}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  units: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Beds"
-              className="input"
-              value={form.beds}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  beds: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Baths"
-              className="input"
-              value={form.baths}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  baths: e.target.value,
-                }))
-              }
-            />
-
-            <input
-              placeholder="Sqft"
-              className="input col-span-2"
-              value={form.sqft}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  sqft: e.target.value,
-                }))
-              }
-            />
-          </div>
-
-          <button
-            onClick={handleAdd}
-            className="w-full h-11 bg-[#e5383b] text-white rounded-lg"
-          >
-            Add Property
-          </button>
-        </div>
-
-        <div>
-          <h3 className="font-semibold mb-3">
-            Live Preview
-          </h3>
-
-          <div className="rounded-2xl overflow-hidden border shadow">
-            <div className="aspect-[4/3]">
-              <img
-                src={
-                  preview ||
-                  "https://via.placeholder.com/600x400?text=Preview"
-                }
-                alt="Preview"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="p-4">
-              <h3 className="font-semibold">
-                {form.name || "Property Title"}
-              </h3>
-
-              <p className="text-sm text-gray-500">
-                {form.location || "Location"}
-              </p>
-
-              <div className="flex gap-3 text-sm mt-2 text-gray-500">
-                <span>{form.beds || 0} Beds</span>
-                <span>{form.baths || 0} Baths</span>
-                <span>{form.sqft || 0} sqft</span>
-              </div>
-
-              <p className="mt-2 font-bold">
-                {form.price || "$0"}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </LandlordModal>
-  );
-}
-
 export default function PropertiesPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
   const [filters, setFilters] = useState({
@@ -514,8 +287,31 @@ export default function PropertiesPage() {
     type: "",
   });
 
-  const [propertyList, setPropertyList] =
-    useState<Property[]>(properties);
+  const [propertyList, setPropertyList] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        const data = await httpGet<{ properties: ApiProperty[] }>(
+          "/investor/properties"
+        );
+        if (active) setPropertyList((data.properties || []).map(toDisplay));
+      } catch (error) {
+        if (active) {
+          toast.error((error as Error).message || "Could not load properties");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const [viewProp, setViewProp] =
     useState<Property | null>(null);
@@ -523,21 +319,17 @@ export default function PropertiesPage() {
   const [editProp, setEditProp] =
     useState<Property | null>(null);
 
-  const [showAdd, setShowAdd] = useState(false);
-
   const cities = [
     ...new Set(propertyList.map((p) => p.location)),
   ];
 
-  const statuses = ["Active", "Inactive"];
+  const statuses = [
+    ...new Set(propertyList.map((p) => p.status)),
+  ];
 
   const types = [
     ...new Set(propertyList.map((p) => p.type)),
   ];
-
-  const handleAddProperty = (newProp: Property) => {
-    setPropertyList((prev) => [newProp, ...prev]);
-  };
 
   const filteredProperties = propertyList.filter((p) => {
     const matchesSearch =
@@ -581,6 +373,8 @@ export default function PropertiesPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-5">
+      <ToastContainer position="top-right" autoClose={2500} theme="colored" />
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
@@ -593,7 +387,7 @@ export default function PropertiesPage() {
         </div>
 
         <button
-          onClick={() => setShowAdd(true)}
+          onClick={() => navigate("/investor/properties/new")}
           className="btn-green flex items-center gap-2 px-5 py-2.5 text-sm font-semibold"
         >
           + Add Property
@@ -736,14 +530,15 @@ export default function PropertiesPage() {
           </span>
         </div>
 
-        <table className="w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
           <thead className="bg-gray-900">
             <tr>
               {[
                 "Property Name",
                 "Location",
                 "Total Units",
-                "Occupancy",
+                "Price",
                 "Status",
                 "Actions",
               ].map((h) => (
@@ -755,7 +550,23 @@ export default function PropertiesPage() {
           </thead>
 
           <tbody className="divide-y divide-gray-50">
-            {paginatedData.map((p) => (
+            {loading && (
+              <tr>
+                <td colSpan={6} className="td text-center text-gray-500">
+                  Loading properties...
+                </td>
+              </tr>
+            )}
+
+            {!loading && paginatedData.length === 0 && (
+              <tr>
+                <td colSpan={6} className="td text-center text-gray-500">
+                  No properties yet. Click “+ Add Property” to create one.
+                </td>
+              </tr>
+            )}
+
+            {!loading && paginatedData.map((p) => (
               <tr
                 key={p.id}
                 className="hover:bg-gray-50 transition-colors"
@@ -789,7 +600,7 @@ export default function PropertiesPage() {
 
                 <td className="td">{p.units}</td>
 
-                <td className="td">{p.occ}</td>
+                <td className="td">{p.income}</td>
 
                 <td className="td">
                   <span
@@ -832,7 +643,8 @@ export default function PropertiesPage() {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
 
       {viewProp && (
@@ -846,13 +658,6 @@ export default function PropertiesPage() {
         <EditPropertyModal
           prop={editProp}
           onClose={() => setEditProp(null)}
-        />
-      )}
-
-      {showAdd && (
-        <AddPropertyModal
-          onClose={() => setShowAdd(false)}
-          onAdd={handleAddProperty}
         />
       )}
 
@@ -889,7 +694,7 @@ export default function PropertiesPage() {
         </div>
 
         <button
-          disabled={currentPage === totalPages}
+          disabled={totalPages === 0 || currentPage >= totalPages}
           onClick={() =>
             setCurrentPage((p) => p + 1)
           }

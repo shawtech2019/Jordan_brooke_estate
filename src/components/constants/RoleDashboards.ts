@@ -6,10 +6,10 @@
  * use the role's own description.
  */
 export const roleDashboardRoutes: Record<string, string> = {
-  tenant: "/dashboard",
-  facilities_maintenance: "/landlord-maintenance",
-  investor: "/landlord-dashboard",
-  admin: "/system-settings",
+  tenant: "/tenant/dashboard",
+  facilities_maintenance: "/investor/maintenance",
+  investor: "/investor/dashboard",
+  admin: "/admin/system-settings",
 };
 
 export const roleTaglines: Record<string, string> = {
@@ -18,4 +18,24 @@ export const roleTaglines: Record<string, string> = {
   investor: "Properties and Rent Trackings",
 };
 
-export const defaultDashboardRoute = "/dashboard";
+export const defaultDashboardRoute = "/tenant/dashboard";
+
+/** The role chooser ("Welcome Back") screen. */
+export const startDashboardRoute = "/start-dashboard";
+
+/**
+ * Resolve where the "Dashboard" shortcut should send a signed-in user:
+ * the dashboard for the role they last selected (kept in localStorage), or the
+ * role chooser so they can pick one. The chooser itself forwards role-less
+ * users on to `/select-role`.
+ */
+export const getDashboardPath = (): string => {
+  if (typeof window === "undefined") return startDashboardRoute;
+
+  const activeRole = window.localStorage.getItem("activeRole");
+  if (activeRole && roleDashboardRoutes[activeRole]) {
+    return roleDashboardRoutes[activeRole];
+  }
+
+  return startDashboardRoute;
+};

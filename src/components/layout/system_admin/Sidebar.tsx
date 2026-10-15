@@ -7,9 +7,11 @@ import {
   FileText,
   LifeBuoy,
   ChevronRight,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import Images from "../../constants/Images";
+import RoleSwitcher from "../RoleSwitcher";
 
 interface NavItem {
   label: string;
@@ -22,40 +24,59 @@ const navItems: NavItem[] = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
-    path: "/system-settings",
+    path: "/admin/system-settings",
   },
   {
     label: "User Management",
     icon: Users,
-    path: "/users",
+    path: "/admin/users",
   },
   {
     label: "Role & Permission",
     icon: ShieldCheck,
-    path: "/roles",
+    path: "/admin/roles",
   },
   {
     label: "System Settings",
     icon: Settings,
-    path: "/system-settings",
+    path: "/admin/system-settings",
   },
   {
     label: "Logs & Audits",
     icon: FileText,
-    path: "/logs",
+    path: "/admin/logs",
   },
   {
     label: "Support",
     icon: LifeBuoy,
-    path: "/support",
+    path: "/admin/support",
   },
 ];
 
-export default function Sidebar() {
-  //  const [open, setOpen] = useState(false);
-  // const closeMenu = () => setOpen(false);
+interface SidebarProps {
+  /** Whether the mobile drawer is open (ignored on large screens). */
+  open?: boolean;
+  /** Closes the mobile drawer. */
+  onClose?: () => void;
+}
+
+export default function Sidebar({ open = false, onClose }: SidebarProps) {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-gray-200 bg-white lg:flex">
+    <>
+      {/* Backdrop for the mobile drawer */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-64 shrink-0 flex flex-col overflow-y-auto border-r border-gray-200 bg-white transition-transform duration-200 lg:sticky lg:z-auto lg:overflow-visible ${
+          open ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
       {/* Logo */}
       <div className="border-b border-gray-200 px-6 py-5">
         <div className="flex items-center gap-3">
@@ -82,6 +103,14 @@ export default function Sidebar() {
           </span>
         </Link>
 
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="ml-auto lg:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <X size={16} />
+          </button>
         </div>
       </div>
 
@@ -98,6 +127,7 @@ export default function Sidebar() {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={onClose}
               className={({ isActive }) =>
                 `relative mb-1 flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200 ${
                   isActive
@@ -126,6 +156,11 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* Role switcher — shown only for users with more than one role */}
+      <div className="px-3 pb-2">
+        <RoleSwitcher variant="sidebar" />
+      </div>
+
       {/* Footer */}
       <div className="border-t border-gray-200 px-6 py-4">
         <div className="flex items-center gap-3">
@@ -143,6 +178,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

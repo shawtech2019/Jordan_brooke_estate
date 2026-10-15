@@ -16,6 +16,8 @@ interface ApiResponse {
   token?: string;
   message?: string;
   requiresRoleSelection?: boolean;
+  requires2FA?: boolean;
+  email?: string;
 }
 
 const Login = () => {
@@ -50,6 +52,16 @@ const Login = () => {
         "auth/login",
         formData
       );
+
+      // Second factor required: the server emailed a code instead of a token.
+      if (response.status === "success" && response.requires2FA) {
+        toast.success(response.message ?? "Verification code sent to your email");
+        setTimeout(
+          () => navigate(`/two-factor?u=${encodeURIComponent(formData.email)}`),
+          900
+        );
+        return;
+      }
 
       if (response.status === "success" && response.token) {
         localStorage.setItem("token", response.token);

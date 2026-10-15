@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { HiOutlineBars3BottomRight } from "react-icons/hi2";
 import { RiCloseFill } from "react-icons/ri";
 import Images from "../constants/Images";
+import { getDashboardPath } from "../constants/RoleDashboards";
 
 const Header = () => {
   const [open, setOpen] = useState(false);
@@ -24,6 +25,13 @@ const Header = () => {
     setOpen(false);
     setIsAuthenticated(false);
     navigate("/");
+  };
+
+  // Jump to the dashboard for the role the user last selected, or let them
+  // choose when nothing is selected yet.
+  const handleDashboard = () => {
+    setOpen(false);
+    navigate(getDashboardPath());
   };
 
   const activeLink =
@@ -86,12 +94,20 @@ const Header = () => {
           {/* Mobile Buttons */}
           <li className="md:hidden mt-6 space-y-3">
             {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
-              >
-                Logout
-              </button>
+              <>
+                <button
+                  onClick={handleDashboard}
+                  className="w-full bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <Link to="/login" onClick={closeMenu}>
                 <button className="w-full border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">
@@ -111,12 +127,20 @@ const Header = () => {
         {/* Desktop Buttons */}
         <div className="hidden md:flex items-center gap-4">
           {isAuthenticated ? (
-            <button
-              onClick={handleLogout}
-              className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
-            >
-              Logout
-            </button>
+            <>
+              <button
+                onClick={handleDashboard}
+                className="bg-[#071c48] hover:bg-[#3a4a73] text-[#fafafa] px-4 py-2 rounded-md font-medium transition-colors shadow-sm"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={handleLogout}
+                className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors"
+              >
+                Logout
+              </button>
+            </>
           ) : (
             <Link to="/login">
               <button className="border border-[#B62931] text-[#031F22] hover:bg-[#B62931] hover:text-white px-4 py-2 rounded-md font-medium transition-colors">

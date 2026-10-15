@@ -8,35 +8,35 @@ const pageResults: SearchResult[] = [
     type: 'page',
     title: 'System Settings',
     subtitle: 'Localization, security, integrations',
-    path: '/settings',
+    path: '/admin/system-settings',
   },
   {
     id: 'page-roles',
     type: 'page',
     title: 'Role & Permission (RBAC)',
     subtitle: 'Manage role access across the system',
-    path: '/roles',
+    path: '/admin/roles',
   },
   {
     id: 'page-users',
     type: 'page',
     title: 'User Management',
     subtitle: 'Invite, suspend, and audit users',
-    path: '/users',
+    path: '/admin/users',
   },
   {
     id: 'page-logs',
     type: 'page',
     title: 'Logs & Audits',
     subtitle: 'System-wide activity trail',
-    path: '/logs',
+    path: '/admin/logs',
   },
   {
     id: 'page-support',
     type: 'page',
     title: 'Support',
     subtitle: 'FAQs and open tickets',
-    path: '/support',
+    path: '/admin/support',
   },
 ]
 
@@ -45,7 +45,7 @@ const userResults: SearchResult[] = systemUsers.map((user) => ({
   type: 'user',
   title: user.name,
   subtitle: `${user.role} \u00b7 ${user.email}`,
-  path: '/users',
+  path: '/admin/users',
 }))
 
 const permissionResults: SearchResult[] = permissionGroups.flatMap((group) =>
@@ -54,7 +54,7 @@ const permissionResults: SearchResult[] = permissionGroups.flatMap((group) =>
     type: 'role-permission' as const,
     title: row.label,
     subtitle: `${group.title} \u00b7 ${roleColumns.length} roles`,
-    path: '/roles',
+    path: '/admin/roles',
   }))
 )
 

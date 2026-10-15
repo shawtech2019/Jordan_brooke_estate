@@ -25,6 +25,16 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 /**
+ * Separate client for multipart/file uploads. It deliberately omits the
+ * default JSON content type so the browser can set `multipart/form-data`
+ * with the correct boundary.
+ */
+const uploadClient: AxiosInstance = axios.create({
+  baseURL: resolveBaseURL(),
+  timeout: 30000,
+});
+
+/**
  * Normalise an axios error into a readable message.
  */
 function toErrorMessage(err: unknown): Error {
@@ -90,6 +100,54 @@ export async function httpPostWithToken<TResponse, TRequest = unknown>(
     throw toErrorMessage(err);
   }
 }
+
+/**
+ * PUT request that attaches the bearer token stored in localStorage.
+ */
+export async function httpPutWithToken<TResponse, TRequest = unknown>(
+  url: string,
+  data: TRequest
+): Promise<TResponse> {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await apiClient.put<TResponse>(url, data, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    return response.data;
+  } catch (err: unknown) {
+    throw toErrorMessage(err);
+  }
+}
+
+/**
+ * Multipart POST (file upload) with the bearer token. Axios sets the
+ * `multipart/form-data` content type + boundary automatically for FormData.
+ */
+export async function httpUploadWithToken<TResponse>(
+  url: string,
+  formData: FormData
+): Promise<TResponse> {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await uploadClient.post<TResponse>(url, formData, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    return response.data;
+  } catch (err: unknown) {
+    throw toErrorMessage(err);
+  }
+}
+
+/**
+ * Turn a stored relative asset path (e.g. `/uploads/avatars/x.jpg`) into a
+ * fully-qualified URL for use in <img src>.
+ */
+export const resolveAssetUrl = (assetPath?: string | null): string => {
+  if (!assetPath) return "";
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+  const origin = resolveBaseURL().replace(/\/api\/?$/, "");
+  return `${origin}${assetPath}`;
+};
 
 export const validateEmail = (e: unknown) => {
   return String(e)

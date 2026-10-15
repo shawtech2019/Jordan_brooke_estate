@@ -8,6 +8,11 @@ import {
   httpPostWithToken,
 } from "../../utils/api_utils";
 import { roleIllustrations } from "../../constants/RoleImages";
+import {
+  roleDashboardRoutes,
+  defaultDashboardRoute,
+  getDashboardPath,
+} from "../../constants/RoleDashboards";
 import Footer from "../../layout/footer/Footer";
 
 interface Role {
@@ -58,11 +63,12 @@ const SelectRole = () => {
 
     (async () => {
       try {
-        // Users who already picked a role go straight to their dashboard.
+        // Only users with NO role at all may see this page. Anyone who already
+        // has a role is sent to their selected dashboard (or the chooser).
         try {
           const me = await httpGet<MeResponse>("auth/me");
           if (active && me.roles?.length) {
-            navigate("/dashboard");
+            navigate(getDashboardPath());
             return;
           }
         } catch {
@@ -106,9 +112,12 @@ const SelectRole = () => {
       );
 
       localStorage.setItem("roles", JSON.stringify(res.roles ?? []));
+      localStorage.setItem("activeRole", selected);
       toast.success("Role selected");
 
-      setTimeout(() => navigate("/dashboard"), 900);
+      // Send the user to the dashboard that belongs to the role they chose.
+      const route = roleDashboardRoutes[selected] ?? defaultDashboardRoute;
+      setTimeout(() => navigate(route), 900);
     } catch (error: unknown) {
       toast.error(
         error instanceof Error ? error.message : "Could not save your role"

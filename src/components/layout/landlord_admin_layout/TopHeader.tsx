@@ -1,4 +1,5 @@
 import { Search, Mic, Bell, Settings } from 'lucide-react';
+import RoleSwitcher from '../RoleSwitcher';
 
 
 const TopHeader = () => {
@@ -21,6 +22,7 @@ const TopHeader = () => {
     </button>
 
     <div className="flex items-center gap-2 ml-auto">
+        <RoleSwitcher variant="outline" />
       {/* Bell */}
       <button className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
         <Bell size={18} className="text-gray-600" />
